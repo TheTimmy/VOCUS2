@@ -34,6 +34,8 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/assume_abstract.hpp>
 
+#include <tinyxml2.h>
+
 using namespace std;
 using namespace cv;
 
@@ -108,9 +110,32 @@ public:
 	bool load(string f_name){
 		std::ifstream conf_file(f_name);
 		if (conf_file.good()) {
-			boost::archive::xml_iarchive ia(conf_file);
-			ia >> boost::serialization::make_nvp("VOCUS2_Cfg", *this);
+			//boost::archive::xml_iarchive ia(conf_file);
+			//ia >> boost::serialization::make_nvp("VOCUS2_Cfg", *this);
 			conf_file.close();
+
+                        tinyxml2::XMLDocument doc;
+                        doc.LoadFile(f_name.c_str());
+                        if (doc.Error()) {
+                                std::cout << "Could not parse " << f_name << " using default configuration\n";
+                                return false;
+                        }
+
+                        auto boost_ser = doc.FirstChildElement("boost_serialization");
+                        auto vocus = boost_ser->FirstChildElement("VOCUS2_Cfg");
+                        c_space = (ColorSpace)stoi(vocus->FirstChildElement("c_space")->FirstChild()->Value());
+                        fuse_feature = (FusionOperation)stoi(vocus->FirstChildElement("fuse_feature")->FirstChild()->Value());
+                        pyr_struct = (PyrStructure)stoi(vocus->FirstChildElement("pyr_struct")->FirstChild()->Value());
+                        start_layer = stoi(vocus->FirstChildElement("start_layer")->FirstChild()->Value());
+                        stop_layer = stoi(vocus->FirstChildElement("stop_layer")->FirstChild()->Value());
+                        center_sigma = stof(vocus->FirstChildElement("center_sigma")->FirstChild()->Value());
+                        surround_sigma = stof(vocus->FirstChildElement("surround_sigma")->FirstChild()->Value());
+                        n_scales = stoi(vocus->FirstChildElement("n_scales")->FirstChild()->Value());
+                        normalize = (bool)stoi(vocus->FirstChildElement("normalize")->FirstChild()->Value());
+
+                        /*boost::archive::xml_iarchive ia(conf_file);
+                        ia >> boost::serialization::make_nvp("VOCUS2_Cfg", *this);
+                        conf_file.close();*/
 			return true;
 		}
 		else cout << "Config file: " << f_name << " not found. Using defaults." << endl;

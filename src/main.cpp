@@ -422,6 +422,11 @@ int main(int argc, char* argv[]) {
 			if(!vc.isOpened()) return EXIT_FAILURE;
 
 			Mat img;
+                        
+                        Size S = Size((int) vc.get(CAP_PROP_FRAME_WIDTH),    // Acquire input size
+						  (int) vc.get(CAP_PROP_FRAME_HEIGHT));
+			int ex = static_cast<int>(vc.get(CAP_PROP_FOURCC));
+			VideoWriter vw("Saliency.avi", ex, vc.get(CAP_PROP_FPS), S, false);
 
 			while(vc.read(img)){
 				n_frames++;
@@ -439,7 +444,7 @@ int main(int argc, char* argv[]) {
 				cout << "frame " << n_frames << ": " << elapsed_time << "sec" << endl;
 				overall_time += elapsed_time;
 
-				vector<Point> msr = get_msr(salmap);
+				/*vector<Point> msr = get_msr(salmap);
 
 				Point2f center;
 				float rad;
@@ -452,12 +457,18 @@ int main(int argc, char* argv[]) {
 					int key_code = waitKey(30);
 
 					if(key_code == 113 || key_code == 27) break;
-				}
+				}*/
+                                
+				Mat output;
+                                Mat input = salmap * 255.f;
+                                input.convertTo(output, CV_8U);
 
+                                vw.write(output);
 				img.release();
 				
 			}
 			vc.release();
+                        vw.release();
 			cout << "Avg. runtime per frame: " << overall_time/(double)n_frames << endl;
 		}
 	}		

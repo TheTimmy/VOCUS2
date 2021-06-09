@@ -21,16 +21,20 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x -fopenmp")
 
 find_package(OpenCV REQUIRED)
 find_package(Boost COMPONENTS serialization REQUIRED)
+find_package(tinyxml2 CONFIG REQUIRED)
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
+include_directories(/data/tim/VOCUS2/tinyxml2/)
+link_directories(/data/tim/VOCUS2/tinyxml2/build/)
 
+message (WARNING ${tinyxml2_LIBRARY_DIRS})
 ADD_LIBRARY( vocus2l STATIC
-       src/VOCUS2.cpp    
-       )
+       src/VOCUS2.cpp
+)
 
 add_executable(vocus2 src/main.cpp src/VOCUS2.cpp)
-target_link_libraries(vocus2 ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_link_libraries(vocus2l ${OpenCV_LIBS} ${Boost_LIBRARIES})
-
+target_link_libraries(vocus2 ${OpenCV_LIBS} ${Boost_LIBRARIES} /data/tim/VOCUS2/tinyxml2/build/libtinyxml2.so)
+target_link_libraries(vocus2l ${OpenCV_LIBS} ${Boost_LIBRARIES} /data/tim/VOCUS2/tinyxml2/build/libtinyxml2.so)
